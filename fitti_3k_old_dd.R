@@ -182,6 +182,11 @@ names(d1) <- names(d2) <- names(d3) <- names(d4) <- c("sc","WL")
 # 
  D <- na.omit(bind_rows(d1, d2,d3,d4))   %>% filter(WL> 0, WL<70 )
  
+ ggplot(data = Dk, aes(x=sc/365, y=WL)) + 
+   geom_point(colour="blue") + 
+   theme_light()
+ 
+ 
  IND<-sample.int(12474, 5000, replace=FALSE)   # A 5k sample
  Dk <- D[IND,]
  

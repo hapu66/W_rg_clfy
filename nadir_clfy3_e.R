@@ -164,6 +164,7 @@ dat_a2 <- df %>% dplyr::select(p_pasientid, ForlopsID, o_sykehus, o_dato_op, sc_
 dat_a5 <- df %>% dplyr::select(p_pasientid, ForlopsID, o_sykehus, o_dato_op, sc_op5, a5_TWL, a5_AWL)   %>% mutate(ktrl=5)
 dat_u6 <- df %>% dplyr::select(p_pasientid, ForlopsID, o_sykehus, o_dato_op, sc_u6, u6_ant_kmi_red, u6_AWL)  %>% mutate(ktrl=1)
 
+d_prim <- df %>% filter(op_primar)
 
 d <- df %>% 
   dplyr::select(p_pasientid, ForlopsID, op_primar, o_sykehus, o_dato_op, sc_u6, sc_op1, sc_op2, sc_op5, 
@@ -205,12 +206,29 @@ base_chr <- function(df){
                 B = (o_opmetode==1 & o_gbp_type == 1)|(o_opmetode==1 & is.na(o_gbp_type)) , 
                 O =  o_opmetode==1 & o_gbp_type == 2) %>%  summarise(n= n(),
                                              Female = pc( mean(F)), 
-                                             Age = mean(p_alder_v_op), 
+                                             Age = mean(p_alder_v_op, na.rm = T), 
                                              bmi_b =   mean(bmi_baseline),
                                              GS = pc(mean(S, na.rm = T)),
                                              GB = pc(mean(B, na.rm = T)),
                                              OA = pc(mean(O, na.rm = T)))
 }
+
+#   First, we want to give some context for our cohort of included patients. 
+# How many patients in the SOReg-N 2023-8-3 dataset are there in total? 
+# Maybe with percentage female, mean age, mean initial BMI. 
+
+nrow(df)  # 
+
+base_chr(df)
+
+base_chr(d_prim)
+
+# Second, we have to give some information on lost to follow up. 
+# How many of the TOTAL amount of patients in the SOReg-N 2023-8-3 dataset that were 
+# eligible for 5yr follow up did have data at 5yr? Same for 1 and 2 years.
+
+
+
 
 #  Poor result:  data-frame, time    call eg.  > poor(Dt, "a1_TWL")
 poor <- function(df, tm){
