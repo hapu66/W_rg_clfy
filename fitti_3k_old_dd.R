@@ -180,13 +180,25 @@ d3 = tibble(dat_WL$sc_op2, dat_WL$a2_TWL)
 d4 = tibble(dat_WL$sc_op5, dat_WL$a5_TWL) 
 names(d1) <- names(d2) <- names(d3) <- names(d4) <- c("sc","WL")
 # 
- D <- na.omit(bind_rows(d1, d2,d3,d4))   %>% filter(WL> 0, WL<70 )
+
+
+# The style of the plot itself is fine, but now it’s drawn from a 5K sample. Is it possible to 
+# include ALL patients from the SOReg-N 2023-8-3 dataset registry for every time point?
+
+# This same plot only with median and -/+ 1 SD and -/+ 2 SD and all patients from the SOReg-N 2023-8-3 dataset.
+
+ D <- na.omit(bind_rows(d1, d2,d3,d4))   %>% filter(WL> 0, WL<70 )  # all data
  
- ggplot(data = Dk, aes(x=sc/365, y=WL)) + 
+ ggplot(data = D, aes(x=sc/365, y=WL)) + 
    geom_point(colour="blue") + 
    theme_light()
  
+ Dtb = D |> dplyr::mutate(sc  = sc/365)  # transform sc into yr:s
+ m0 =  lms(WL, sc , families = c("BCTo"), data = Dtb, k=3, cent = c(2.3, 15.9, 50, 84.1, 97.7))
  
+ Dtb$Tsc <-(Dtb$sc)^(m0$power)
+ 
+ # ----------
  IND<-sample.int(12474, 5000, replace=FALSE)   # A 5k sample
  Dk <- D[IND,]
  

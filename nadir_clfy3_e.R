@@ -227,9 +227,29 @@ base_chr(d_prim)
 # How many of the TOTAL amount of patients in the SOReg-N 2023-8-3 dataset that were 
 # eligible for 5yr follow up did have data at 5yr? Same for 1 and 2 years.
 
+d_elig_a5 =  d_prim %>% filter(o_dato_op <  dato_uttrekk - years(5) -months(6))
+d_elig_a2 =  d_prim %>% filter(o_dato_op <  dato_uttrekk - years(2) -months(3))
+d_elig_a1 =  d_prim %>% filter(o_dato_op <  dato_uttrekk - years(1) -months(3))
+
+d_act_a5 = d_elig_a5 %>% filter(a5_ferdigstill == 1, 
+                                a5_dato_oppf - o_dato_op < 2007,
+                                a5_dato_oppf - o_dato_op > 1642,
+                                a5_oppf_type  %in%  c("Frammøte", "Per telefon eller via nettmøte",  "Per brev/mail eller på annen måte"),
+                                !is.na(a5_ant_vekt),
+                                a5_ant_vekt > 0)
+
+d_act_a2 = d_elig_a2 %>% filter(a2_ferdigstill == 1, 
+                                a2_dato_oppf - o_dato_op < 2*365+90,
+                                a2_dato_oppf - o_dato_op > 2*365-90,
+                                a2_oppf_type  %in%  c(1,2,3))
+
+d_act_a1 = d_elig_a1 %>% filter(a1_ferdigstill == 1, 
+                                a1_dato_oppf - o_dato_op < 365+90,
+                                a1_dato_oppf - o_dato_op > 365-90,
+                                a1_oppf_type  %in%  c("Frammøte", "Per telefon eller via nettmøte",  "Per brev/mail eller på annen måte"))
 
 
-
+ 
 #  Poor result:  data-frame, time    call eg.  > poor(Dt, "a1_TWL")
 poor <- function(df, tm){
   switch(tm,
