@@ -194,7 +194,13 @@ names(d1) <- names(d2) <- names(d3) <- names(d4) <- c("sc","WL")
    theme_light()
  
  Dtb = D |> dplyr::mutate(sc  = sc/365)  # transform sc into yr:s
- m0 =  lms(WL, sc , families = c("BCTo"), data = Dtb, k=3, cent = c(2.3, 15.9, 50, 84.1, 97.7))
+ m0 =  lms(WL, sc , families = c("BCCGo"), data = Dtb, k=3.5, method.pb = c("GAIC"),  # calibration = F,  
+           cent = c(2.3, 15.9, 50, 84.1, 97.7))  # best fitti NO BCCGo  failed   *** Refitting NO *** 
+ 
+ m0 =  lms(WL, sc , families = c("BCCGo"), data = Dtb, k=3.5, method.pb = c("ML"),  # calibration = F,  
+           cent = c(2.3, 15.9, 50, 84.1, 97.7))
+ 
+ 
  
  Dtb$Tsc <-(Dtb$sc)^(m0$power)
  
@@ -206,14 +212,27 @@ names(d1) <- names(d2) <- names(d3) <- names(d4) <- c("sc","WL")
    geom_point(colour="blue") + 
    theme_light()
 # --------------------------------------------------------------------
-# m0 <- lms(WL, sc, families=c("BCCGo","BCPEo","BCTo"), data=D,
-#           k=3, calibration=F, trans.x=T)
+ m0 <- lms(WL, sc, families=c("Bo","BCPEo","BCTo"), data=D,
+          k=3, calibration=F, trans.x=T)
+ 
+# par(mar=c(1,1,1,1))
+# graphics.off()
+ 
+  Dk = Dk |> dplyr::mutate(sc  = sc/365)
+  m0 =  lms(WL, sc  , families = c("BCCGo"), data = D , 
+            k=3,  lim.trans = c(0.5, 1.5), method.pb = c("GAIC"),
+             n.cyc = 50,
+            cent = c(2.3, 15.9, 50, 84.1, 97.7))
  
   Dk = Dk |> dplyr::mutate(sc_y = sc/365)
-  m0 =  lms(WL, sc_y , families = c("BCPEo"), data = Dk, k=3, cent = c(2.3, 15.9, 84.1, 97.7))
- 
+  m0 =  lms(WL, sc , families = c("BCCGo"), data = D , k=2.5,  
+            n.cyc = 50, method.pb = c("GAIC"),
+            cent = c(2.3, 15.9, 50, 84.1, 97.7))
+  
+  
+  
   m0  <-  lms(data=Dk,  WL, sc, families=c("BCCGo"),   # , "BCPEo", "BCTo"
-              k=3.5, calibration=F, trans.x=T)                                  # lms makes a centile plot
+              k=3.5, calibration=F )                   # lms makes a centile plot
  
     Dk$Tsc <-(Dk$sc)^(m0$power)
 #  
@@ -232,6 +251,8 @@ names(d1) <- names(d2) <- names(d3) <- names(d4) <- c("sc","WL")
   
   
   T <- (Dk$sc)^(op$par[4])
+  
+  T <- (Dk$sc)^0.075
   MD <- gamlss(data = Dk, WL ~ cs(T, df= op$par[1]),
                        sigma.formula = ~cs(T, df = op$par[2]),
                        nu.formula = ~cs(T, df= op$par[3],
