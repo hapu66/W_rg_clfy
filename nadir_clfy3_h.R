@@ -243,9 +243,9 @@ d2_nt <- aars_ktrls(d_nt)         # alle sjukehus
 d2_nt |> summarise(a1_nt = sum(et_nt, na.rm = T), a2_nt = sum(to_nt, na.rm = T) )
 
 
-d <- df %>%  filter(a5_TWL <80) %>%
+d <- d_prim %>%  filter(a5_TWL <80) %>%
   dplyr::select(p_pasientid, ForlopsID, op_primar, o_sykehus, o_dato_op, sc_u6, sc_op1, sc_op2, sc_op5,
-  b_ant_vekt, a1_ant_vekt, a2_ant_vekt, a5_ant_vekt, u6_TWL, a1_TWL, a2_TWL, a5_TWL,
+  b_ant_vekt, a1_ant_vekt, a2_ant_vekt, a5_ant_vekt, u6_TWL, a1_TWL, a2_TWL, a5_TWL, a5_nt, a5_dato_oppf,
   a1_AWL, a2_AWL, a5_AWL, contains("beh"), contains("ferdig"),
   o_opmetode, o_gbp_type, p_alder_v_op, Sex, bmi_baseline) %>%
   filter(op_primar, !is.na(a5_TWL))
@@ -273,6 +273,9 @@ d_c = d_c %>%
 
 Dt  =  Dt %>% filter(a5_TWL > -5)  # 3064 (prim)
 
+#
+# Dt |> filter(!a5_nt) |> dplyr::select(o_dato_op,  a5_dato_oppf ) |> mutate(a5_dato_oppf-o_dato_op)
+
 
 # Dt %>% filter(is.na(u6_TWL))
 # A tibble: 20 × 65
@@ -298,11 +301,14 @@ base_chr <- function(dt){
 }
 
 #  Poor result:  data-frame, time    call eg.  > poor(Dt, "a1_TWL")
+
+#  DATO -classifiering:  NADIR -1SD = 25,  a5  -2SD =10 -1SD=20
 poor <- function(df, tm){
   switch(tm,
          nadir =
-           {sd_m = median(df$nadir, na.rm = T) -     sd(df$nadir, na.rm = T)
-           sd_2m =median(df$nadir, na.rm = T) -  2* sd(df$nadir, na.rm = T)},
+           {sd_m = 25 
+           # median(df$nadir, na.rm = T) -     sd(df$nadir, na.rm = T)
+           sd_2m = median(df$nadir, na.rm = T) -  2* sd(df$nadir, na.rm = T)},
 
          u6_TWL =
            {sd_m = median(df$u6_TWL, na.rm = T) -     sd(df$u6_TWL, na.rm = T)
@@ -314,8 +320,10 @@ poor <- function(df, tm){
     {sd_m = median(df$a2_TWL, na.rm = T) -     sd(df$a2_TWL, na.rm = T)
     sd_2m =median(df$a2_TWL, na.rm = T) -  2* sd(df$a2_TWL, na.rm = T)},
   a5_TWL =
-    {sd_m = median(df$a5_TWL, na.rm = T) -     sd(df$a5_TWL, na.rm = T)
-    sd_2m =median(df$a5_TWL, na.rm = T) -  2* sd(df$a5_TWL, na.rm = T)})
+    {sd_m = 20 
+    # median(df$a5_TWL, na.rm = T) -     sd(df$a5_TWL, na.rm = T)
+    sd_2m = 10}) 
+    #  median(df$a5_TWL, na.rm = T) -  2* sd(df$a5_TWL, na.rm = T)})
 
   c(sd_2m, sd_m)
 }
@@ -442,7 +450,7 @@ clfy <-function(df){
 }
  table(clfy(Dt))  # a5_TWL >= nadir ~ "0",
 
-pc( table(clfy(Dt))/  sum(table(clfy(Dt))) )
+pc( table(clfy(Dt))/  sum(table(clfy(Dt)))  )  
 sum( pc( table(clfy(Dt))/  sum(table(clfy(Dt))) ))
 
 
