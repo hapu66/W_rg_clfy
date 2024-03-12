@@ -244,7 +244,7 @@ d2_nt |> summarise(a1_nt = sum(et_nt, na.rm = T), a2_nt = sum(to_nt, na.rm = T) 
 
 
 d <- d_prim %>%  filter(a5_TWL <80) %>%
-  dplyr::select(p_pasientid, ForlopsID, op_primar, o_sykehus, o_dato_op, sc_u6, sc_op1, sc_op2, sc_op5,
+  dplyr::select(p_pasientid, ForlopsID, op_primar, o_sykehus, o_dato_op, p_dod, sc_u6, sc_op1, sc_op2, sc_op5,
   b_ant_vekt, a1_ant_vekt, a2_ant_vekt, a5_ant_vekt, u6_TWL, a1_TWL, a2_TWL, a5_TWL, a5_nt, a5_dato_oppf,
   a1_AWL, a2_AWL, a5_AWL, contains("beh"), contains("ferdig"),
   o_opmetode, o_gbp_type, p_alder_v_op, Sex, bmi_baseline) %>%
@@ -273,6 +273,10 @@ d_c = d_c %>%
 
 Dt  =  Dt %>% filter(a5_TWL > -5)  # 3064 (prim)
 
+table(Dt$p_dod, useNA = "always")
+#  0    1 <NA> 
+#  4    3 3062  
+#                            3 are dead.  3/3064  ~=  0.1%
 #
 # Dt |> filter(!a5_nt) |> dplyr::select(o_dato_op,  a5_dato_oppf ) |> mutate(a5_dato_oppf-o_dato_op)
 
@@ -634,7 +638,7 @@ Dt_2 = Dt %>% filter(a5_TWL > -5)
 
 
 
-
+#  -------------------------------------------------------------------------------
 
 lB = round(adq2(Dt_2, "a5_TWL"),1)
 a1 = paste0("-2SD: ", lB[1])
@@ -657,10 +661,10 @@ md5 =   median(Dt_2$a5_TWL, na.rm = T)
 
 
 # position = 'identity'
-ggplot(data = Dt_2, aes(x=a5_TWL)) + geom_histogram(bins=34,  boundary= isf,  colour="black",
+late = ggplot(data = Dt_2, aes(x=a5_TWL)) + geom_histogram(bins=34,  boundary= isf,  colour="black",
                                                     aes(fill=cl), position = 'identity',
                                                     show.legend = FALSE) +
-  ggtitle("Late weight loss")+ xlab("Five years %TWL")+ ylab("patients") +
+  ggtitle("Late weight loss")+ xlab("%TWL 5 years")+ ylab("patients") +
   geom_vline(aes(  xintercept =  mn5),  linewidth=1, colour= "black") +
   geom_vline(aes(  xintercept =  md5),  linewidth=1, colour= "darkgrey") +
   geom_vline(aes(  xintercept =  pr),  linewidth=1, colour= "black") +
@@ -668,11 +672,15 @@ ggplot(data = Dt_2, aes(x=a5_TWL)) + geom_histogram(bins=34,  boundary= isf,  co
   scale_fill_manual(labels = c("> average-SD", "insufficient", "poor"), values = c( "black", "grey", "white")) +
   scale_x_continuous(breaks =  adq2(Dt_2, "a5_TWL"), labels = c(a1,a2,a3,a4,a5)) + # theme(legend.position = "none") +
   theme_minimal( )
+late
 
-# -----------------------------------------------
+late + theme(axis.text.x = element_text(size=14),
+             axis.text.y = element_text(size=14) )
+# ---------------------------------------------------------------------------
 Dt_3 <- Dt_2 |> mutate(cl =    ifelse( a2_TWL < pr, "grey", "white"))
 mn =  mean(Dt_3$a2_TWL, na.rm = T)
 md =   median(Dt_3$a2_TWL, na.rm = T)
+
 
 lB2 = round(adq2(Dt_3, "a2_TWL"),1)
 b1 = paste0("-2SD: ", lB2[1])
@@ -681,13 +689,11 @@ b3 = paste0("median: ", lB2[3])
 b4 = paste0("+SD: ", lB2[4])
 b5 = paste0("+2SD: ", lB2[5])
 
-
-
 # position = 'identity'
-ggplot(data = Dt_3, aes(x=a2_TWL)) + geom_histogram(bins=34,  boundary= pr,  colour="black",
+early= ggplot(data = Dt_3, aes(x=a2_TWL)) + geom_histogram(bins=34,  boundary= pr,  colour="black",
                                                     aes(fill=cl), position = 'identity',
                                                     show.legend = FALSE) +
-  ggtitle("Early weight loss")+ xlab("Two years %TWL")+ ylab("patients") +
+  ggtitle("Early weight loss")+ xlab("Highest %TWL 1-2 years")+ ylab("patients") +
   geom_vline(aes(  xintercept =  mn),  linewidth=1, colour= "black") +
   geom_vline(aes(  xintercept =  md),  linewidth=1, colour= "darkgrey") +
   geom_vline(aes(  xintercept =  pr),  linewidth=1, colour= "black") +
@@ -695,7 +701,10 @@ ggplot(data = Dt_3, aes(x=a2_TWL)) + geom_histogram(bins=34,  boundary= pr,  col
   scale_fill_manual(labels = c("> average-SD",   "poor"), values = c( "grey", "white" )) +
   scale_x_continuous(breaks =  adq2(Dt_2, "a5_TWL"), labels = c(b1,b2,b3,b4,b5)) + # theme(legend.position = "none") +
   theme_minimal( )
+early
 
+early + theme(axis.text.x = element_text(size=14),
+             axis.text.y = element_text(size=14) )
 
 # 2024-01-26  nadir
 lB3 = round(adq2(Dt_3, "nadir"),1)
