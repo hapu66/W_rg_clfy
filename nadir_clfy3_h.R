@@ -290,7 +290,7 @@ table(Dt$p_dod, useNA = "always")
 # ------------------------------------------------------------------------------
 #  Baseline characteristics
 base_chr <- function(dt){
-  dt %>% mutate(Fm = Sex == "F",
+ dt %>% mutate(Fm = Sex == "F",
                 S = o_opmetode==6,
                 B = (o_opmetode==1 & o_gbp_type == 1)|(o_opmetode==1 & is.na(o_gbp_type)) ,
                 O =  o_opmetode==1 & o_gbp_type == 2) %>%  summarise(n= n(),
@@ -303,6 +303,15 @@ base_chr <- function(dt){
                 GB =  100*mean(B, na.rm = T),
                 OA =  100*mean(O, na.rm = T))
 }
+
+
+
+
+
+all_vs_gr <- function(gr,   vr= "p_alder_v_op"){  t.test(Dt[[vr]], gr[[vr]])}
+
+
+
 
 #  Poor result:  data-frame, time    call eg.  > poor(Dt, "a1_TWL")
 
@@ -664,7 +673,7 @@ md5 =   median(Dt_2$a5_TWL, na.rm = T)
 late = ggplot(data = Dt_2, aes(x=a5_TWL)) + geom_histogram(bins=34,  boundary= isf,  colour="black",
                                                     aes(fill=cl), position = 'identity',
                                                     show.legend = FALSE) +
-  ggtitle("Late weight loss")+ xlab("%TWL 5 years")+ ylab("patients") +
+  ggtitle("Late weight loss")+ xlab("%TWL 5 years")+ ylab("Patients") +
   geom_vline(aes(  xintercept =  mn5),  linewidth=1, colour= "black") +
   geom_vline(aes(  xintercept =  md5),  linewidth=1, colour= "darkgrey") +
   geom_vline(aes(  xintercept =  pr),  linewidth=1, colour= "black") +
@@ -674,15 +683,24 @@ late = ggplot(data = Dt_2, aes(x=a5_TWL)) + geom_histogram(bins=34,  boundary= i
   theme_minimal( )
 late
 
-late + theme(axis.text.x = element_text(size=14),
-             axis.text.y = element_text(size=14) )
+finl = late + theme(plot.title = element_text(size = 18),
+              axis.text.x = element_text(size=12),
+              axis.text.y = element_text(size=12), 
+              axis.title.x = element_text(size = 16), axis.title.y = element_text(size = 16))
+
+
 # ---------------------------------------------------------------------------
-Dt_3 <- Dt_2 |> mutate(cl =    ifelse( a2_TWL < pr, "grey", "white"))
-mn =  mean(Dt_3$a2_TWL, na.rm = T)
-md =   median(Dt_3$a2_TWL, na.rm = T)
+Dt_3 <- Dt_2 |> mutate(cl =    ifelse( nadir < pr, "grey", "white"))
+mn =  mean(Dt_3$nadir, na.rm = T)
+md =   median(Dt_3$nadir, na.rm = T)
+
+isf=   adq(Dt_3, "nadir")[1]
+pr = adq(Dt_3, "nadir")[2]
+med = adq(Dt_3, "nadir")[3]
 
 
-lB2 = round(adq2(Dt_3, "a2_TWL"),1)
+
+lB2 = round(adq2(Dt_3, "nadir"),1)
 b1 = paste0("-2SD: ", lB2[1])
 b2 = paste0("-SD: ", lB2[2])
 b3 = paste0("median: ", lB2[3])
@@ -690,21 +708,23 @@ b4 = paste0("+SD: ", lB2[4])
 b5 = paste0("+2SD: ", lB2[5])
 
 # position = 'identity'
-early= ggplot(data = Dt_3, aes(x=a2_TWL)) + geom_histogram(bins=34,  boundary= pr,  colour="black",
+early= ggplot(data = Dt_3, aes(x=nadir)) + geom_histogram(bins=34,  boundary= pr,  colour="black",
                                                     aes(fill=cl), position = 'identity',
                                                     show.legend = FALSE) +
-  ggtitle("Early weight loss")+ xlab("Highest %TWL 1-2 years")+ ylab("patients") +
+  ggtitle("Early weight loss")+ xlab("Highest %TWL 1-2 years") + ylab("Patients") +
   geom_vline(aes(  xintercept =  mn),  linewidth=1, colour= "black") +
   geom_vline(aes(  xintercept =  md),  linewidth=1, colour= "darkgrey") +
-  geom_vline(aes(  xintercept =  pr),  linewidth=1, colour= "black") +
+  geom_vline(aes(  xintercept = pr),  linewidth=1, colour= "black") +
  # geom_vline(aes(  xintercept =  isf),  linewidth=1, colour= "black") +
   scale_fill_manual(labels = c("> average-SD",   "poor"), values = c( "grey", "white" )) +
-  scale_x_continuous(breaks =  adq2(Dt_2, "a5_TWL"), labels = c(b1,b2,b3,b4,b5)) + # theme(legend.position = "none") +
+  scale_x_continuous(breaks =  adq2(Dt_3, "nadir"), labels = c(b1,b2,b3,b4,b5)) + # theme(legend.position = "none") +
   theme_minimal( )
 early
 
-early + theme(axis.text.x = element_text(size=14),
-             axis.text.y = element_text(size=14) )
+early + theme(plot.title = element_text(size = 18),
+              axis.text.x = element_text(size=12),
+               axis.text.y = element_text(size=12), 
+              axis.title.x = element_text(size = 16), axis.title.y = element_text(size = 16))
 
 # 2024-01-26  nadir
 lB3 = round(adq2(Dt_3, "nadir"),1)
