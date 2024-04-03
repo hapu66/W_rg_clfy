@@ -341,6 +341,27 @@ poor <- function(df, tm){
   c(sd_2m, sd_m)
 }
 
+poor_SRG<- function(df, tm){
+  switch(tm,
+         nadir =
+           {sd_m = median(df$nadir, na.rm = T) -     sd(df$nadir, na.rm = T)     # 25 
+           sd_2m = median(df$nadir, na.rm = T) -  2* sd(df$nadir, na.rm = T)},
+         u6_TWL =
+           {sd_m = median(df$u6_TWL, na.rm = T) -     sd(df$u6_TWL, na.rm = T)
+           sd_2m =median(df$u6_TWL, na.rm = T) -  2* sd(df$u6_TWL, na.rm = T)},
+         a1_TWL =
+           {sd_m = median(df$a1_TWL, na.rm = T) -     sd(df$a1_TWL, na.rm = T)
+           sd_2m =median(df$a1_TWL, na.rm = T) -  2* sd(df$a1_TWL, na.rm = T)},
+         a2_TWL =
+           {sd_m = median(df$a2_TWL, na.rm = T) -     sd(df$a2_TWL, na.rm = T)
+           sd_2m =median(df$a2_TWL, na.rm = T) -  2* sd(df$a2_TWL, na.rm = T)},
+         a5_TWL =
+           {sd_m = median(df$a5_TWL, na.rm = T) -     sd(df$a5_TWL, na.rm = T)   # 20 
+           sd_2m =  median(df$a5_TWL, na.rm = T) -  2* sd(df$a5_TWL, na.rm = T)}) # 10
+  
+  c(sd_2m, sd_m)
+}
+
 
 pr <- d %>% filter(a1_TWL < poor(d,"a1_TWL")[2], a1_TWL > poor(d,"a1_TWL")[1]) %>% nrow()
 isf <- d %>% filter(a1_TWL < poor(d,"a1_TWL")[1]) %>% nrow()
